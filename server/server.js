@@ -4,6 +4,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import { connectDB } from './config/db.js';
 import healthRoutes from './routes/healthRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import { notFound, errorHandler } from './middlewares/errorHandler.js';
 
 // Load environment variables
@@ -30,14 +31,18 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
-      auth: '/api/auth (coming Day 4)',
+      auth: {
+        signup: 'POST /api/auth/signup',
+        login: 'POST /api/auth/login (coming Day 5)',
+      },
       rooms: '/api/rooms (coming Day 6)',
     },
   });
 });
 
-// Health check route
+// Routes
 app.use('/', healthRoutes);
+app.use('/api/auth', authRoutes);
 
 // Error Handling Middlewares
 app.use(notFound);

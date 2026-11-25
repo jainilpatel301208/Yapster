@@ -33,7 +33,8 @@ app.get('/', (req, res) => {
       health: '/health',
       auth: {
         signup: 'POST /api/auth/signup',
-        login: 'POST /api/auth/login (coming Day 5)',
+        login: 'POST /api/auth/login',
+        protectedProfile: 'GET /api/auth/me (Requires Bearer JWT)',
       },
       rooms: '/api/rooms (coming Day 6)',
     },

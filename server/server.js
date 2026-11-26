@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import { connectDB } from './config/db.js';
 import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import roomRoutes from './routes/roomRoutes.js';
 import { notFound, errorHandler } from './middlewares/errorHandler.js';
 
 // Load environment variables
@@ -36,7 +37,13 @@ app.get('/', (req, res) => {
         login: 'POST /api/auth/login',
         protectedProfile: 'GET /api/auth/me (Requires Bearer JWT)',
       },
-      rooms: '/api/rooms (coming Day 6)',
+      rooms: {
+        list: 'GET /api/rooms (Requires Auth)',
+        create: 'POST /api/rooms (Requires Auth)',
+        getOne: 'GET /api/rooms/:id (Requires Auth)',
+        update: 'PUT /api/rooms/:id (Requires Auth, Creator only)',
+        delete: 'DELETE /api/rooms/:id (Requires Auth, Creator only)',
+      },
     },
   });
 });
@@ -44,6 +51,7 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/', healthRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/rooms', roomRoutes);
 
 // Error Handling Middlewares
 app.use(notFound);

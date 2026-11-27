@@ -6,6 +6,7 @@ import {
   updateRoom,
   deleteRoom,
 } from '../controllers/roomController.js';
+import messageRoutes from './messageRoutes.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -13,9 +14,12 @@ const router = express.Router();
 // Apply auth protection middleware to all room routes
 router.use(protect);
 
-// CRUD Routes for Yap Rooms (Main Entity)
+// Re-route into other resource routers (Nested related entity)
+router.use('/:roomId/messages', messageRoutes);
+
+// CRUD Routes for Yap Rooms (Main Entity with Search & Pagination)
 router.route('/')
-  .get(getRooms)       // READ: Get all rooms
+  .get(getRooms)       // READ: Get all rooms (supports ?search=&isPrivate=&page=&limit=)
   .post(createRoom);   // CREATE: Create new room
 
 router.route('/:id')

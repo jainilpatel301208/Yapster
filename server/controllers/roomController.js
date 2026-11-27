@@ -57,22 +57,65 @@ export const createRoom = async (req, res, next) => {
 };
 
 /**
- * @desc   Get all available rooms
- * @route  GET /api/rooms
+ * @desc   Get rooms with search, filter, and pagination
+ * @route  GET /api/rooms?search=keyword&isPrivate=false&page=1&limit=10
  * @access Private (Requires JWT)
  */
 export const getRooms = async (req, res, next) => {
   try {
-    // Return all public rooms OR rooms where user is a member
-    const rooms = await Room.find({
-      $or: [{ isPrivate: false }, { members: req.user._id }],
-    })
+    const { search, isPrivate, page: queryPage, limit: queryLimit } = req.query;
+
+    // Base query: public rooms or rooms where current user is a member
+    const query = {
+      $and: [
+        {
+          $or: [{ isPrivate: false }, { members: req.user._id }],
+        },
+      ],
+    };
+
+    // Filter by privacy if specified
+    if (isPrivate !== undefined) {
+      query.$and.push({ isPrivate: isPrivate === 'true' });
+    }
+
+    // Search filter across name, displayName, description, and topic
+    if (search && search.trim()) {
+      const searchRegex = { $regex: search.trim(), $options: 'i' };
+      query.$and.push({
+        $or: [
+          { name: searchRegex },
+          { displayName: searchRegex },
+          { description: searchRegex },
+          { topic: searchRegex },
+        ],
+      });
+    }
+
+    // Pagination calculations
+    const page = Math.max(1, parseInt(queryPage, 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(queryLimit, 10) || 10));
+    const skip = (page - 1) * limit;
+
+    const totalRooms = await Room.countDocuments(query);
+    const totalPages = Math.ceil(totalRooms / limit) || 1;
+
+    const rooms = await Room.find(query)
       .populate('createdBy', 'username email avatar')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({
       success: true,
       count: rooms.length,
+      pagination: {
+        page,
+        limit,
+        totalRooms,
+        totalPages,
+        hasMore: page < totalPages,
+      },
       rooms,
     });
   } catch (error) {

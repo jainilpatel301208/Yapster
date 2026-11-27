@@ -38,11 +38,15 @@ app.get('/', (req, res) => {
         protectedProfile: 'GET /api/auth/me (Requires Bearer JWT)',
       },
       rooms: {
-        list: 'GET /api/rooms (Requires Auth)',
+        list: 'GET /api/rooms (Supports ?search=&isPrivate=&page=&limit=)',
         create: 'POST /api/rooms (Requires Auth)',
         getOne: 'GET /api/rooms/:id (Requires Auth)',
         update: 'PUT /api/rooms/:id (Requires Auth, Creator only)',
         delete: 'DELETE /api/rooms/:id (Requires Auth, Creator only)',
+      },
+      messages: {
+        list: 'GET /api/rooms/:roomId/messages (Supports ?search=&page=&limit=)',
+        send: 'POST /api/rooms/:roomId/messages (Requires Auth)',
       },
     },
   });
